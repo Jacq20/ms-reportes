@@ -2,8 +2,6 @@ package com.perfulandia.ms_reportes.controller;
 
 import java.time.LocalDateTime;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +14,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.perfulandia.ms_reportes.dto.PeriodoDTO;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.perfulandia.ms_reportes.dto.ReporteRequestDTO;
 import com.perfulandia.ms_reportes.model.Reporte;
 import com.perfulandia.ms_reportes.model.TipoReporte;
 import com.perfulandia.ms_reportes.service.ReporteService;
@@ -29,39 +29,50 @@ public class ReporteControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @SuppressWarnings("removal")
     @MockitoBean
     private ReporteService reporteService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule());
 
     @Test
     void testGenerarReporte() throws Exception {
-        PeriodoDTO periodo = new PeriodoDTO(LocalDateTime.of(2026, 1, 1, 0, 0), LocalDateTime.of(2026, 1, 31, 0, 0));
-        Reporte generado = new Reporte(1L, TipoReporte.VENTAS, "suc-01", periodo.periodoInicio(), periodo.periodoFin(), LocalDateTime.now());
-        Mockito.when(reporteService.generarReporte(eq(TipoReporte.VENTAS), eq("suc-01"), any(PeriodoDTO.class)))
-                .thenReturn(generado);
+        ReporteRequestDTO request = new ReporteRequestDTO(
+            TipoReporte.VENTAS,
+            "suc-01",
+            LocalDateTime.of(2026, 1, 1, 0, 0),
+            LocalDateTime.of(2026, 1, 31, 0, 0)
+        );
+        Reporte generado = new Reporte(1L, TipoReporte.VENTAS, "suc-01",
+            request.periodoInicio(), request.periodoFin(), LocalDateTime.now());
+        Mockito.when(reporteService.generarReporte(any(ReporteRequestDTO.class)))
+               .thenReturn(generado);
 
         mockMvc.perform(post("/api/v1/reportes")
-                        .param("tipo", "VENTAS")
-                        .param("idSucursal", "suc-01")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(periodo)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tipo").value("VENTAS"));
     }
 
     @Test
     void testGenerarReportePeriodoInvalido() throws Exception {
-        PeriodoDTO periodo = new PeriodoDTO(LocalDateTime.of(2026, 2, 1, 0, 0), LocalDateTime.of(2026, 1, 1, 0, 0));
-        Mockito.when(reporteService.generarReporte(eq(TipoReporte.INVENTARIO), eq("suc-01"), any(PeriodoDTO.class)))
-                .thenThrow(new RuntimeException("El periodo de inicio no puede ser posterior al periodo de fin"));
+        ReporteRequestDTO request = new ReporteRequestDTO(
+            TipoReporte.INVENTARIO,
+            "suc-01",
+            LocalDateTime.of(2026, 2, 1, 0, 0),
+            LocalDateTime.of(2026, 1, 1, 0, 0)
+        );
+        Mockito.when(reporteService.generarReporte(any(ReporteRequestDTO.class)))
+               .thenThrow(new RuntimeException("El periodo de inicio no puede ser posterior al periodo de fin"));
 
         mockMvc.perform(post("/api/v1/reportes")
-                        .param("tipo", "INVENTARIO")
-                        .param("idSucursal", "suc-01")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(periodo)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
+    }
+
+    private static <T> T any(Class<T> clazz) {
+        return org.mockito.ArgumentMatchers.any(clazz);
     }
 }

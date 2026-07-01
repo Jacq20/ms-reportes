@@ -4,12 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.perfulandia.ms_reportes.dto.PeriodoDTO;
+import com.perfulandia.ms_reportes.dto.ReporteRequestDTO;
 import com.perfulandia.ms_reportes.model.Reporte;
-import com.perfulandia.ms_reportes.model.TipoReporte;
 import com.perfulandia.ms_reportes.service.ReporteService;
 
 @RestController
@@ -20,9 +18,7 @@ public class ReporteController {
     private ReporteService reporteService;
 
     @PostMapping
-    public Reporte generarReporte(@RequestParam TipoReporte tipo,
-                                   @RequestParam String idSucursal,
-                                   @RequestBody PeriodoDTO periodo) {
-        return reporteService.generarReporte(tipo, idSucursal, periodo);
+    public Reporte generarReporte(@RequestBody ReporteRequestDTO request) {
+        return reporteService.generarReporte(request);
     }
 }
