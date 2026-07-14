@@ -9,6 +9,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -40,4 +41,9 @@ public class Reporte {
 
     @Column(name = "fecha_generacion")
     private LocalDateTime fechaGeneracion;
+
+    //Almacena el resumen de datos consultados a otros
+    @Lob
+    @Column(name= "resumen", columnDefinition = "TEXT")
+    private String resumen;
 }

@@ -44,7 +44,7 @@ public class ReporteControllerTest {
             LocalDateTime.of(2026, 1, 31, 0, 0)
         );
         Reporte generado = new Reporte(1L, TipoReporte.VENTAS, "suc-01",
-            request.periodoInicio(), request.periodoFin(), LocalDateTime.now());
+            request.periodoInicio(), request.periodoFin(), LocalDateTime.now(), "Resumen de prueba");
         Mockito.when(reporteService.generarReporte(any(ReporteRequestDTO.class)))
                .thenReturn(generado);
 
