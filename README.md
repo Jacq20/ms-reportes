@@ -1,7 +1,7 @@
 # ms-reportes
 
 **Perfulandia SPA — Microservicio de Reportes**
-DSY1103 Desarrollo FullStack 1 · Evaluación Final Transversal · 2025
+DSY1103 Desarrollo FullStack 1 · Evaluación Final Transversal · 2026
 
 ---
 
